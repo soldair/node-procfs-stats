@@ -1,5 +1,4 @@
 
-
 var fs = require('fs');
 
 // read the procfs stat file for a pid
@@ -13,7 +12,15 @@ module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
   
 // read the number of threads running out of the tasks dir
 module.exports.threads = function(pid,cb){
+  //
   
+}
+
+module.exports.io = function(pid,cb){
+  fs.readFile('/proc/'+pid+'/io',function(err,buf){
+    if(err) return cb(err);
+    cb(false,kv(buf));
+  });
 }
 
 // read the number of fds in the fd folder
@@ -32,17 +39,37 @@ module.exports.fds = function(pid,cb){// or task: ":pid/task/:tid"
 module.exports.fd = function(fdlink,cb){
   fs.readlink(fdlink,function(err,p){
     if(err) return cb(err);
-    if(p.indexOf('/') !== 0) {
-      cb(false,{path:p,stat:false})
-      // i can do netstat etc here when i figure it out. =)
-    } else {
+    var infop = fdlink.split('/');
+    var id = infop.pop(); 
+
+    var out = {
+      path:p,
+      info:false,
+      stat:false
+    }
+
+    infop = infop.join('/')+'info/'+id;
+
+    var c = 1, done = function(){
+      if(!--c) cb(false,out); 
+    }
+
+    fs.readFile(infop,function(err,fdinfo){
+      if(err) return cb(err);
+      out.info = kv(fdinfo);
+      done();
+    });
+
+    if(p.indexOf('/') === 0) {
+      c++;
       fs.stat(p,function(err,stat){
         // ignore enoent probably
         if(err) return cb(err);
-        cb(false,{path:p,stat:stat});
+        out.stat = stat;
+        done();
       })
     }
-  }) 
+  });
 }
 
 module.exports.cpu = function(cb){
@@ -68,7 +95,8 @@ module.exports.cpu = function(cb){
 }
 
 //i wonder if this is useful? you have to be root to get it.
-// its not documented and its probably useless.
+// its not documented and the nr of the syscall though its supposed to be first never gives me the value i expect in the syscall mapping table. 
+// i checked unistd.h and a few other places for the __NR nr int value it must be another number not listed.
 module.exports.syscall = function(){
   //http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/diff/fs/proc/base.c?id=ebcb67341fee34061430f3367f2e507e52ee051b
   //+          "%ld 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx\n",
@@ -105,5 +133,14 @@ function assoc(fields,values){
   return o;
 }
 
-
+function kv(buf){
+  var info = {};
+  var lines = buf.toString().split("\n");
+  lines.forEach(function(l){
+    var matches = l.match(/^([^:]+):[\s]+(.+)$/);
+    if(!matches) return;
+    info[matches[1]] = matches[2];
+  });
+  return info;
+}
 
