@@ -4,7 +4,7 @@
   "description": "get detailed information (more than ps, top etc) about running process on linux machines from node.",
   "main": "index.js",
   "scripts": {
-    "test": "tape test/*.js",
+    "test": "tape test/*.js"
   },
   "author": "Ryan Day <soldair@gmail.com>",
   "license": "MIT",
