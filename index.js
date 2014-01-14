@@ -132,6 +132,19 @@ module.exports.udp = function(cb){
   });
 }
 
+// active unix
+module.exports.unix = function(cb){
+  fs.readFile("/proc/net/unix",function(err,buf){
+    var lines = buf.toString().trim().split("\n");
+    var keys = lines.shift().trim().split(/\s+/);
+    var out = [];
+    lines.forEach(function(l){
+      out.push(assoc(keys,l.trim().split(/\s+/)))
+    });
+    cb(err,out,buf);
+  });
+}
+
 // net dev stats per NIC
 module.exports.net = function(cb){
   fs.readFile("/proc/net/dev",function(err,buf){
@@ -139,12 +152,25 @@ module.exports.net = function(cb){
   });
 }
 
-
-// net dev stats per NIC
+// wifi stats
 module.exports.wifi = function(cb){
   fs.readFile("/proc/net/wireless",function(err,buf){
     cb(err,sectiontable(buf),buf);
   });
+}
+
+module.exports.disk = function(cb){
+  fs.readFile("/proc/diskstats",function(err,buf){
+    if(err) return cb(err);
+
+    var lines = buf.toString().trim().split("\n");
+    var out = []
+    lines.forEach(function(l){
+      out.push(assoc(module.exports.fields['/proc/diskstats'],l.trim().split(/\s+/)))
+    })
+    cb(false,out,buf);
+  });
+
 }
 
 
@@ -173,8 +199,16 @@ module.exports.fields = {
       ,'rsslim','startcode','endcode','startstack','kstkesp','kstkeip','signal'
       ,'blocked','sigignore','sigcatch','wchan','nswap','cnswap','exit_signal'
       ,'processor','rt_priority','policy','delayacct_blkio_ticks','guest_time'
-      ,'cguest_time']
+      ,'cguest_time'
+    ],
+   '/proc/diskstats':[
+      "device_number","device_number_minor","device"
+      ,"reads_completed","reads_merged","sectors_read","ms_reading"
+      ,"writes_completed","writes_merged","sectors_written","ms_writing"
+      ,"ios_pending","ms_io","ms_weighted_io"
+    ]
 }
+
 
 // works on linuxy /proc
 module.exports.works = fs.existsSync('/proc/'+process.pid+'/stat');

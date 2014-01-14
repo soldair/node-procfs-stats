@@ -9,7 +9,7 @@ test('can get prod info',function(t){
     t.ok(!err,'should not have error getting data for this pid '+err);
     t.ok(data,"should have data");
 
-    console.log(data);
+    if(process.env.DEBUG) console.log(data);
 
     t.end();
   });
