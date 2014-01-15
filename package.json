@@ -1,6 +1,6 @@
 {
   "name": "procfs-stats",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "get detailed information (more than ps, top etc) about running process on linux machines from node.",
   "main": "index.js",
   "scripts": {
@@ -15,6 +15,6 @@
     "hexip": "~1.0.1"
   },
   "repository": {
-    "url": "git://github.com/soldair/node-hexip.git"
+    "url": "git://github.com/soldair/node-procfs-stats.git"
   }
 }
