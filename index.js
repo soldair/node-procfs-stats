@@ -27,7 +27,7 @@ module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
         cb(err,kv(buf));
       });
     },
-    cmdline:function(cb){ 
+    argv:function(cb){ 
       fs.readFile('/proc/'+pid+'/cmdline',function(err,buf){
         cb(err,nulldelim(buf));
       });
@@ -64,8 +64,8 @@ module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
       fs.readdir(fddir,function(err,fds){
         if(err) return cb(err);
         fds = fds.map(function(v){
-          s = fddir+'/'+v;
-          s.id = v;
+          v.path = fddir+'/'+v;
+          return v;
         });
         cb(false,fds);
       })
@@ -87,6 +87,7 @@ module.exports.fd = function(fdlink,cb){
     var id = infop.pop(); 
 
     var out = {
+      fd:fdlink,
       path:p,
       info:false,
       stat:false
