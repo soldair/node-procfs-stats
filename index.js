@@ -63,10 +63,9 @@ module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
       var fddir = '/proc/'+pid+'/task';
       fs.readdir(fddir,function(err,fds){
         if(err) return cb(err);
-        fds = fds.map(function(v){
-          v.path = fddir+'/'+v;
-          return v;
-        });
+        //fds = fds.map(function(v){
+          //return {id:v,path:ddir+'/'+v};
+        //});
         cb(false,fds);
       })
     },

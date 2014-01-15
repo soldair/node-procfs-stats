@@ -15,25 +15,26 @@ var procfs = require('procfs-stats');
 ```
 ## API
 
-<a href="#ctor"></a>
-<a href="#pidstats-io"></a>
-<a href="#pidstats-stat"></a>
-<a href="#pidstats-statm"></a>
-<a href="#pidstats-status"></a>
-<a href="#pidstats-env"></a>
-<a href="#pidstats-cwd"></a>
-<a href="#pidstats-fds"></a>
-<a href="#pidstats-threads"></a>
-<a href="#pidstats-thread"></a>
-<a href="#cpu"></a>
-<a href="#fd"></a>
-<a href="#tcp"></a>
-<a href="#udp"></a>
-<a href="#unix"></a>
-<a href="#net"></a>
-<a href="#disk"></a>
-<a href="#wifi"></a>
-<a href="#works"></a>
+<a href="#ctor">procfs(pid)</a>
+<a href="#pidstats-io">ps.io(cb)</a>
+<a href="#pidstats-stat">ps.stat(cb)</a>
+<a href="#pidstats-statm">ps.statm(cb)</a>
+<a href="#pidstats-status">ps.status(cb)</a>
+<a href="#pidstats-env">ps.env(cb)</a>
+<a href="#pidstats-cwd">ps.cwd(cb)</a>
+<a href="#pidstats-cwd">ps.argv(cb)</a>
+<a href="#pidstats-fds">ps.fds(cb)</a>
+<a href="#pidstats-threads">ps.threads(cb)</a>
+<a href="#pidstats-thread">ps.thread(tid)</a>
+<a href="#cpu">procfs.cpu(cb)</a>
+<a href="#fd">procfs.fd(cb)</a>
+<a href="#tcp">procfs.tcp(cb)</a>
+<a href="#udp">procfs.udp(cb)</a>
+<a href="#unix">procfs.unix(cb)</a>
+<a href="#net">procfs.net(cb)</a>
+<a href="#disk">procfs.disk(cb)</a>
+<a href="#wifi">procfs.wifi(cb)</a>
+<a href="#works">procfs.works()</a>
 
 
 <a name="ctor"></a>
@@ -68,23 +69,143 @@ console.log(ps);
  
 <a name="pidstats-stat"></a>
 ### ps.stat(cb)
+  - from /proc/pid/stat
   - mixed detailed process stats
   - calls back with 
 
+```js
 
+{ pid: '8157',
+  comm: '(node)',
+  state: 'R',
+  ppid: '8156',
+  pgrp: '8150',
+  session: '1703',
+  tty_nr: '34822',
+  tpgid: '8150',
+  flags: '4202496',
+  minflt: '3788',
+  cminflt: '0',
+  majflt: '0',
+  cmajflt: '0',
+  utime: '8',
+  stime: '1',
+  cutime: '0',
+  cstime: '0',
+  priority: '20',
+  nice: '0',
+  num_threads: '6',
+  itrealvalue: '0',
+  starttime: '62912348',
+  vsize: '910020608',
+  rss: '3277',
+  rsslim: '18446744073709551615',
+  startcode: '4194304',
+  endcode: '12964340',
+  startstack: '140736757717536',
+  kstkesp: '140736757701400',
+  kstkeip: '140541704641018',
+  signal: '0',
+  blocked: '0',
+  sigignore: '4096',
+  sigcatch: '16898',
+  wchan: '18446744073709551615',
+  nswap: '0',
+  cnswap: '0',
+  exit_signal: '17',
+  processor: '0',
+  rt_priority: '0',
+  policy: '0',
+  delayacct_blkio_ticks: '0',
+  guest_time: '0',
+  cguest_time: '0' }
+
+```
 
 <a name="pidstats-statm"></a>
 ### ps.statm(cb)
+  - from /proc/pid/statm
   - memory stats
   - calls back with an object of mem stats
 
+```js
+
+{ size: '222173',
+  resident: '3342',
+  share: '1284',
+  text: '2142',
+  lib: '0',
+  data: '215399',
+  dt: '0' }
+
+```
+
 <a name="pidstats-status"></a>
 ### ps.status(cb)
+  - from /proc/pid/status
   - mixed process stats with more human friendly formatting
+
+```js
+
+{ Name: 'node',
+  State: 'S (sleeping)',
+  Tgid: '8157',
+  Pid: '8157',
+  PPid: '8156',
+  TracerPid: '0',
+  Uid: '1000\t1000\t1000\t1000',
+  Gid: '1000\t1000\t1000\t1000',
+  FDSize: '64',
+  Groups: '4 20 24 27 30 46 109 121 1000 ',
+  VmPeak: '954740 kB',
+  VmSize: '888692 kB',
+  VmLck: '0 kB',
+  VmPin: '0 kB',
+  VmHWM: '13464 kB',
+  VmRSS: '13368 kB',
+  VmData: '861452 kB',
+  VmStk: '144 kB',
+  VmExe: '8568 kB',
+  VmLib: '4084 kB',
+  VmPTE: '172 kB',
+  VmSwap: '0 kB',
+  Threads: '6',
+  SigQ: '2/63628',
+  SigPnd: '0000000000000000',
+  ShdPnd: '0000000000000000',
+  SigBlk: '0000000000000000',
+  SigIgn: '0000000000001000',
+  SigCgt: '0000000180004202',
+  CapInh: '0000000000000000',
+  CapPrm: '0000000000000000',
+  CapEff: '0000000000000000',
+  CapBnd: 'ffffffffffffffff',
+  Cpus_allowed: 'ff',
+  Cpus_allowed_list: '0-7',
+  Mems_allowed: '00000000,00000001',
+  Mems_allowed_list: '0',
+  voluntary_ctxt_switches: '39',
+  nonvoluntary_ctxt_switches: '29' }
+
+```
 
 <a name="pidstats-env"></a>
 ### ps.env(cb)
+  - from /proc/pid/environ
   - calls back with the array of environment variables as they were defined when the process started.
+
+```js
+  
+[ ...
+  'MANPATH=:/usr/local/avr/man:/usr/local/avr/man',
+  'LS_OPTIONS=--color=auto',
+  'npm_config_git=git',
+  'npm_config_optional=true',
+  'EDITOR=vim',
+  'npm_config_email=soldair@',
+  'npm_config_json=' ]
+
+```
 
 <a name="pidstats-cwd"></a>
 ### ps.cwd(cb)
@@ -111,6 +232,7 @@ these are the args for the command ```node test/pid_argv.js --example```
 
 <a name="pidstats-fds"></a>
 ### ps.fds(cb)
+  - from /proc/pid/fds
   - returns an array of paths to file descriptors in the procfs fds directory for this process. 
 
 ```js
@@ -119,19 +241,20 @@ these are the args for the command ```node test/pid_argv.js --example```
   '/proc/8157/fd/1',
   '/proc/8157/fd/10',
   '/proc/8157/fd/2',
-  '/proc/8157/fd/3',
-  '/proc/8157/fd/4',
-  '/proc/8157/fd/5',
-  '/proc/8157/fd/6',
-  '/proc/8157/fd/7',
-  '/proc/8157/fd/8',
   '/proc/8157/fd/9' ]
 
 ```
 
 <a name="pidstats-threads"></a>
 ### ps.threads(cb)
-  - calls back with an array of the paths to each task in the procfs task dir. each string has an id property which can be passed to ps.thread
+  - from /proc/pid/tasks
+  - calls back with an array of the ids/names of each task in the procfs task dir for that pid.
+
+```js
+
+[ '10299', '10300', '10301', '10302', '10303', '10304' ]
+
+```
 
 <a name="pidstats-thread"></a>
 ### ps.thread(tid)
@@ -139,10 +262,15 @@ these are the args for the command ```node test/pid_argv.js --example```
 
 the exported function also has these "static" methods.
 
+```js
+
+var thread = ps.thread(tid);
+
+```
+
 <a name="cpu"></a>
 ### procfs.cpu(cb)
-
-  - uses /proc/stat
+  - from /proc/stat
   - calls back with an object like this
 
 ```js
@@ -182,6 +310,7 @@ the exported function also has these "static" methods.
 
 <a name="fd"></a>
 ### procfs.fd(fdPath,cb)
+  - from /proc/pid/fds/fd and /proc/pid/fdinfo
   - fdPath is the full path 
   - calls back with an object 
   - stat is an fs.Stats object
@@ -222,17 +351,79 @@ the exported function also has these "static" methods.
 
 <a name="tcp"></a>
 ### procfs.tcp(cb)
+  - from /proc/net/tcp
   - the tcp connection table as an array
   - used to count connections/servers and get throughput per active connection
+  - note "extra" fields that appear after inode in the text file for tcp connections are placed under the _ key which is an object keyed off of the field offset of the value
+
+```js
+[ ....
+  { sl: '10:',
+    local_address: '127.0.0.1:24599',
+    rem_address: '0.0.0.0:0',
+    st: '0A',
+    tx_queue: '00000000',
+    rx_queue: '00000000',
+    tr: '00',
+    'tm->when': '00000000',
+    retrnsmt: '00000000',
+    uid: '118',
+    timeout: '0',
+    inode: '12881',
+    _: 
+     { '12': '1',
+       '13': '0000000000000000',
+       '14': '100',
+       '15': '0',
+       '16': '0',
+       '17': '10',
+       '18': '-1' } } ]
+
+```
 
 <a name="udp"></a>
 ### procfs.udp(cb)
+  - from /proc/net/udp
   - the udp connection table as an array
   - used to count listeners/server and get throughput
 
+```js
+
+[ { sl: '1186:',
+    local_address: '127.0.0.1:52011',
+    rem_address: '0.0.0.0:0',
+    st: '07',
+    tx_queue: '00000000',
+    rx_queue: '00000000',
+    tr: '00',
+    'tm->when': '00000000',
+    retrnsmt: '00000000',
+    uid: '116',
+    timeout: '0',
+    inode: '12576',
+    ref: '2',
+    pointer: '0000000000000000',
+    drops: '0' },
+    ... ]
+
+```
+
 <a name="unix"></a>
 ### procfs.unix(cb)
+  - from /proc/net/unix
   - the unix socket table as an array
+  
+```js
+[ { Num: '0000000000000000:',
+    RefCount: '00000002',
+    Protocol: '00000000',
+    Flags: '00010000',
+    Type: '0001',
+    St: '01',
+    Inode: '12597',
+    Path: '/var/run/mysqld/mysqld.sock' },
+  ...]
+```
 
 <a name="net"></a>
 ### procfs.net(cb)
@@ -268,7 +459,7 @@ the exported function also has these "static" methods.
 
 <a name="disk"></a>
 ### procfs.disk(cb)
-  - uses /proc/diskstats
+  - from /proc/diskstats
   - calls back with an array of objects like this.
 
 ```js
@@ -307,10 +498,31 @@ the exported function also has these "static" methods.
 
 <a name="wifi"></a>
 ### procfs.wifi(cb)
+  - from /proc/net/wireless
   - calls back with wifi defices and stats
+
+```js
+[ { Interface: 'wlan0:',
+    status: '0000',
+    link: { Quality: '51.' },
+    level: { Quality: '-59.' },
+    noise: { Quality: '-256' },
+    nwid: { 'Discarded packets': '0' },
+    crypt: { 'Discarded packets': '0' },
+    frag: { 'Discarded packets': '0' },
+    retry: { 'Discarded packets': '40' },
+    misc: { 'Discarded packets': '54' },
+    beacon: { Missed: '0' } } ]
+```
+
 
 <a name="works"></a>
 ### procfs.works === true||false
+  - fs.exists on /proc
   - if the procfs can be accessed this value is true
 
+```js
 
+if(!procfs.works) process.exit('oh no!')
+
+```
