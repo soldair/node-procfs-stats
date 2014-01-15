@@ -3,6 +3,19 @@ procfs-stats
 
 get detailed information about running process and threads on linux machines from node. more than ps/top/iostat alone
 
+```js
+
+var procfs = require('procfs-stats');
+var ps = procfs(process.pid);
+
+ps.io(function(err,io){
+
+  console.log('my process has done this much io',io);
+
+})
+
+```
+
 this only works on linux right now i expect. some things may work on other systems that have some support for procfs.
 
 ## hope
