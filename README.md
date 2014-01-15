@@ -22,13 +22,6 @@ this only works on linux right now i expect. some things may work on other syste
 
 it would be so cool to have a higher level module that unifies system monitoring scripts in such a way as each os specific implementation can export a common interface like this and we can have xplatform monitoring helpers!! does windows have any external process introspection api?!
 
-### require!
-
-```js
-
-var procfs = require('procfs-stats');
-
-```
 ## API
 
  * <a href="#ctor">procfs(pid)</a>
@@ -62,7 +55,6 @@ var procfs = require('procfs-stats');
 
 var ps = procfs(process.pid)
 console.log(ps);
-
 
 ```
 
