@@ -1,7 +1,7 @@
 procfs-stats
 ============
 
-get more detailed information (than ps, top etc) about running process and threads on linux machines from node.
+get detailed information about running process and threads on linux machines from node. more than ps/top/iostat alone
 
 this only works on linux right now i expect. some things may work on other systems that have some support for procfs.
 
@@ -10,31 +10,34 @@ this only works on linux right now i expect. some things may work on other syste
 it would be so cool to have a higher level module that unifies system monitoring scripts in such a way as each os specific implementation can export a common interface like this and we can have xplatform monitoring helpers!! does windows have any external process introspection api?!
 
 ### require!
+
 ```js
+
 var procfs = require('procfs-stats');
+
 ```
 ## API
 
-<a href="#ctor">procfs(pid)</a>
-<a href="#pidstats-io">ps.io(cb)</a>
-<a href="#pidstats-stat">ps.stat(cb)</a>
-<a href="#pidstats-statm">ps.statm(cb)</a>
-<a href="#pidstats-status">ps.status(cb)</a>
-<a href="#pidstats-env">ps.env(cb)</a>
-<a href="#pidstats-cwd">ps.cwd(cb)</a>
-<a href="#pidstats-cwd">ps.argv(cb)</a>
-<a href="#pidstats-fds">ps.fds(cb)</a>
-<a href="#pidstats-threads">ps.threads(cb)</a>
-<a href="#pidstats-thread">ps.thread(tid)</a>
-<a href="#cpu">procfs.cpu(cb)</a>
-<a href="#fd">procfs.fd(cb)</a>
-<a href="#tcp">procfs.tcp(cb)</a>
-<a href="#udp">procfs.udp(cb)</a>
-<a href="#unix">procfs.unix(cb)</a>
-<a href="#net">procfs.net(cb)</a>
-<a href="#disk">procfs.disk(cb)</a>
-<a href="#wifi">procfs.wifi(cb)</a>
-<a href="#works">procfs.works()</a>
+ * <a href="#ctor">procfs(pid)</a>
+ * <a href="#pidstats-io">ps.io(cb)</a>
+ * <a href="#pidstats-stat">ps.stat(cb)</a>
+ * <a href="#pidstats-statm">ps.statm(cb)</a>
+ * <a href="#pidstats-status">ps.status(cb)</a>
+ * <a href="#pidstats-env">ps.env(cb)</a>
+ * <a href="#pidstats-cwd">ps.cwd(cb)</a>
+ * <a href="#pidstats-cwd">ps.argv(cb)</a>
+ * <a href="#pidstats-fds">ps.fds(cb)</a>
+ * <a href="#pidstats-threads">ps.threads(cb)</a>
+ * <a href="#pidstats-thread">ps.thread(tid)</a>
+ * <a href="#cpu">procfs.cpu(cb)</a>
+ * <a href="#fd">procfs.fd(cb)</a>
+ * <a href="#tcp">procfs.tcp(cb)</a>
+ * <a href="#udp">procfs.udp(cb)</a>
+ * <a href="#unix">procfs.unix(cb)</a>
+ * <a href="#net">procfs.net(cb)</a>
+ * <a href="#disk">procfs.disk(cb)</a>
+ * <a href="#wifi">procfs.wifi(cb)</a>
+ * <a href="#works">procfs.works()</a>
 
 
 <a name="ctor"></a>
