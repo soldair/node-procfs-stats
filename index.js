@@ -13,8 +13,34 @@ module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
         cb(false,assoc(module.exports.fields['/proc/:pid/stat'],values));
       });
     },
-    thread:function(tid){
-      return  module.exports(pid+"/task/"+tid);
+    // memory stat file 
+    statm:function(cb){
+      fs.readFile('/proc/'+pid+'/statm',function(err,buf){
+          if(err) return cb(err);
+          var values = buf.toString().trim().split(/\s+/g)
+          cb(false,assoc(module.exports.fields['/proc/:pid/statm'],values))
+      })
+    },
+    // status is a human version of most but not all of the data in both stat and statm
+    status:function(cb){
+      fs.readFile('/proc/'+pid+'/status',function(err,buf){
+        cb(err,kv(buf));
+      });
+    },
+    cmdline:function(cb){ 
+      fs.readFile('/proc/'+pid+'/cmdline',function(err,buf){
+        cb(err,nulldelim(buf));
+      });
+    },
+    env:function(cb){
+      fs.readFile('/proc/'+pid+'/environ',function(err,buf){
+        cb(err,nulldelim(buf));
+      });     
+    },
+    cwd:function(cb){
+      fs.readlink("/proc/"+pid+"/cwd",function(err,path){
+        cb(err,path);
+      })
     },
     io:function(cb){
       fs.readFile('/proc/'+pid+'/io',function(err,buf){
@@ -38,11 +64,15 @@ module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
       fs.readdir(fddir,function(err,fds){
         if(err) return cb(err);
         fds = fds.map(function(v){
-          return fddir+'/'+v;
+          s = fddir+'/'+v;
+          s.id = v;
         });
         cb(false,fds);
       })
-    }
+    },
+    thread:function(tid){
+      return  module.exports(pid+"/task/"+tid);
+    },
   }
 
   return o;
@@ -201,7 +231,18 @@ module.exports.fields = {
       ,'processor','rt_priority','policy','delayacct_blkio_ticks','guest_time'
       ,'cguest_time'
     ],
-   '/proc/diskstats':[
+    '/proc/:pid/statm':[
+      "size"     // total program size
+                 // (same as VmSize in /proc/[pid]/status)
+      ,"resident"// resident set size
+                 // (same as VmRSS in /proc/[pid]/status)
+      ,"share"   // shared pages (from shared mappings)
+      ,"text"    // text (code)
+      ,"lib"     // library (unused in Linux 2.6)
+      ,"data"    // data + stack
+      ,"dt"      // dirty pages (unused in Linux 2.6)
+    ],
+    '/proc/diskstats':[
       "device_number","device_number_minor","device"
       ,"reads_completed","reads_merged","sectors_read","ms_reading"
       ,"writes_completed","writes_merged","sectors_written","ms_writing"
@@ -314,4 +355,11 @@ function sectiontable(buf){
 function fixaddr(addr){
   addr = addr.split(':');
   return hexip(addr[0])+':'+hexip.port(addr[1]);
+}
+
+function nulldelim(buf){
+  if(!buf) return false;
+  var args = buf.toString().split("\x00")
+  args.pop();// remove trailing empty.
+  return args; 
 }
