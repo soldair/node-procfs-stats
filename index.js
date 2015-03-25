@@ -7,15 +7,15 @@ module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
   var o = {
     pid:pid,
     stat:function(cb){
-      fs.readFile("/proc/"+pid+'/stat',function(err,data){
+      fs.readFile(module.exports.PROC+pid+'/stat',function(err,data){
         if(err) return cb(err);
         var values = data.toString().trim().split(" ");
         cb(false,assoc(module.exports.fields['/proc/:pid/stat'],values));
       });
     },
-    // memory stat file 
+    // memory stat file
     statm:function(cb){
-      fs.readFile('/proc/'+pid+'/statm',function(err,buf){
+      fs.readFile(module.exports.PROC+pid+'/statm',function(err,buf){
           if(err) return cb(err);
           var values = buf.toString().trim().split(/\s+/g)
           cb(false,assoc(module.exports.fields['/proc/:pid/statm'],values))
@@ -23,33 +23,33 @@ module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
     },
     // status is a human version of most but not all of the data in both stat and statm
     status:function(cb){
-      fs.readFile('/proc/'+pid+'/status',function(err,buf){
+      fs.readFile(module.exports.PROC+pid+'/status',function(err,buf){
         cb(err,kv(buf));
       });
     },
-    argv:function(cb){ 
-      fs.readFile('/proc/'+pid+'/cmdline',function(err,buf){
+    argv:function(cb){
+      fs.readFile(module.exports.PROC+pid+'/cmdline',function(err,buf){
         cb(err,nulldelim(buf));
       });
     },
     env:function(cb){
-      fs.readFile('/proc/'+pid+'/environ',function(err,buf){
+      fs.readFile(module.exports.PROC+pid+'/environ',function(err,buf){
         cb(err,nulldelim(buf));
-      });     
+      });
     },
     cwd:function(cb){
-      fs.readlink("/proc/"+pid+"/cwd",function(err,path){
+      fs.readlink(module.exports.PROC+pid+"/cwd",function(err,path){
         cb(err,path);
       })
     },
     io:function(cb){
-      fs.readFile('/proc/'+pid+'/io',function(err,buf){
+      fs.readFile(module.exports.PROC+pid+'/io',function(err,buf){
         if(err) return cb(err);
         cb(false,kv(buf));
       });
     },
     fds:function(cb){
-      var fddir = '/proc/'+pid+'/fd';
+      var fddir = module.exports.PROC+pid+'/fd';
       fs.readdir(fddir,function(err,fds){
         if(err) return cb(err);
         fds = fds.map(function(v){
@@ -60,7 +60,7 @@ module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
     },
     threads:function(cb){
       // read the number of threads running out of the tasks dir
-      var fddir = '/proc/'+pid+'/task';
+      var fddir = module.exports.PROC+pid+'/task';
       fs.readdir(fddir,function(err,fds){
         if(err) return cb(err);
         //fds = fds.map(function(v){
@@ -78,12 +78,16 @@ module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
 };
 
 
+// path to /proc
+module.exports.PROC = '/proc/';
+
+
 // stat fd, get full path, get type/socket type..
 module.exports.fd = function(fdlink,cb){
   fs.readlink(fdlink,function(err,p){
     if(err) return cb(err);
     var infop = fdlink.split('/');
-    var id = infop.pop(); 
+    var id = infop.pop();
 
     var out = {
       fd:fdlink,
@@ -95,7 +99,7 @@ module.exports.fd = function(fdlink,cb){
     infop = infop.join('/')+'info/'+id;
 
     var c = 1, done = function(){
-      if(!--c) cb(false,out); 
+      if(!--c) cb(false,out);
     }
 
     fs.readFile(infop,function(err,fdinfo){
@@ -117,7 +121,7 @@ module.exports.fd = function(fdlink,cb){
 }
 
 module.exports.cpu = function(cb){
-  fs.readFile('/proc/stat',function(err,buf){
+  fs.readFile(module.exports.PROC+'stat',function(err,buf){
     if(err) return cb(err);
     var lines = buf.toString().trim().split("\n");
 
@@ -140,7 +144,7 @@ module.exports.cpu = function(cb){
 
 // active tcp
 module.exports.tcp = function(cb){
-  fs.readFile("/proc/net/tcp",function(err,buf){
+  fs.readFile(module.exports.PROC+"net/tcp",function(err,buf){
     var t = nettable(buf);
     t.forEach(function(con){
       con.rem_address = fixaddr(con.rem_address);
@@ -152,7 +156,7 @@ module.exports.tcp = function(cb){
 
 // active udp
 module.exports.udp = function(cb){
-  fs.readFile("/proc/net/udp",function(err,buf){
+  fs.readFile(module.exports.PROC+"net/udp",function(err,buf){
     var t = nettable(buf);
     t.forEach(function(con){
       con.rem_address = fixaddr(con.rem_address);
@@ -164,7 +168,7 @@ module.exports.udp = function(cb){
 
 // active unix
 module.exports.unix = function(cb){
-  fs.readFile("/proc/net/unix",function(err,buf){
+  fs.readFile(module.exports.PROC+"net/unix",function(err,buf){
     var lines = buf.toString().trim().split("\n");
     var keys = lines.shift().trim().split(/\s+/);
     var out = [];
@@ -177,20 +181,20 @@ module.exports.unix = function(cb){
 
 // net dev stats per NIC
 module.exports.net = function(cb){
-  fs.readFile("/proc/net/dev",function(err,buf){
+  fs.readFile(module.exports.PROC+"net/dev",function(err,buf){
     cb(err,sectiontable(buf),buf);
   });
 }
 
 // wifi stats
 module.exports.wifi = function(cb){
-  fs.readFile("/proc/net/wireless",function(err,buf){
+  fs.readFile(module.exports.PROC+"net/wireless",function(err,buf){
     cb(err,sectiontable(buf),buf);
   });
 }
 
 module.exports.disk = function(cb){
-  fs.readFile("/proc/diskstats",function(err,buf){
+  fs.readFile(module.exports.PROC+"diskstats",function(err,buf){
     if(err) return cb(err);
 
     var lines = buf.toString().trim().split("\n");
@@ -205,7 +209,7 @@ module.exports.disk = function(cb){
 
 
 //i wonder if this is useful? you have to be root to get it.
-// its not documented and the nr of the syscall though its supposed to be first never gives me the value i expect in the syscall mapping table. 
+// its not documented and the nr of the syscall though its supposed to be first never gives me the value i expect in the syscall mapping table.
 // i checked unistd.h and a few other places for the __NR nr int value it must be another number not listed.
 //module.exports.syscall = function(){
   //http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/diff/fs/proc/base.c?id=ebcb67341fee34061430f3367f2e507e52ee051b
@@ -215,7 +219,7 @@ module.exports.disk = function(cb){
   //+          sp, pc);
   //
   // 232 0x5 0x7fff89a352b0 0x400 0x3e8 0x44 0x7fff89a382f0 0x7fff89a38220 0x7f042d9a9619
-  // 232 0x5 0x7fff89a352b0 0x400 0x7d0 0x2214350 0x7fff89a382f0 0x7fff89a38158 0x7f042d9a9619 
+  // 232 0x5 0x7fff89a352b0 0x400 0x7d0 0x2214350 0x7fff89a382f0 0x7fff89a38158 0x7f042d9a9619
 //}
 
 module.exports.fields = {
@@ -252,7 +256,7 @@ module.exports.fields = {
 
 
 // works on linuxy /proc
-module.exports.works = fs.existsSync('/proc/'+process.pid+'/stat');
+module.exports.works = fs.existsSync(module.exports.PROC+process.pid+'/stat');
 
 function assoc(fields,values){
   var o = {};
@@ -310,7 +314,7 @@ function sectiontable(buf){
   var s,l,c,p = 0,map = {},keys = [];
   for(var i=0;i<sections.length;++i) {
     s = sections[i].trim();
-    l = sections[i].length; 
+    l = sections[i].length;
     c = columns[i].trim().split(/\s+/g);
     while(c.length) {
       map[keys.length] = s;
@@ -361,5 +365,5 @@ function nulldelim(buf){
   if(!buf) return false;
   var args = buf.toString().split("\x00")
   args.pop();// remove trailing empty.
-  return args; 
+  return args;
 }
