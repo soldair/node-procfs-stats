@@ -3,11 +3,16 @@ var fs = require('fs');
 var hexip = require('hexip');
 
 // read the procfs stat file for a pid
-module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
+module.exports = function(pid/*,procpath*/,cb){ // or task: ":pid/task/:tid"
+
+  var pp = _pp(arguments,1);
+  var procPath = pp.procPath
+  cb = pp.cb;
+
   var o = {
     pid:pid,
     stat:function(cb){
-      fs.readFile(module.exports.PROC+pid+'/stat',function(err,data){
+      fs.readFile(procPath+pid+'/stat',function(err,data){
         if(err) return cb(err);
         var values = data.toString().trim().split(" ");
         cb(false,assoc(module.exports.fields['/proc/:pid/stat'],values));
@@ -15,7 +20,7 @@ module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
     },
     // memory stat file
     statm:function(cb){
-      fs.readFile(module.exports.PROC+pid+'/statm',function(err,buf){
+      fs.readFile(procPath+pid+'/statm',function(err,buf){
           if(err) return cb(err);
           var values = buf.toString().trim().split(/\s+/g)
           cb(false,assoc(module.exports.fields['/proc/:pid/statm'],values))
@@ -23,33 +28,33 @@ module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
     },
     // status is a human version of most but not all of the data in both stat and statm
     status:function(cb){
-      fs.readFile(module.exports.PROC+pid+'/status',function(err,buf){
+      fs.readFile(procPath+pid+'/status',function(err,buf){
         cb(err,kv(buf));
       });
     },
     argv:function(cb){
-      fs.readFile(module.exports.PROC+pid+'/cmdline',function(err,buf){
+      fs.readFile(procPath+pid+'/cmdline',function(err,buf){
         cb(err,nulldelim(buf));
       });
     },
     env:function(cb){
-      fs.readFile(module.exports.PROC+pid+'/environ',function(err,buf){
+      fs.readFile(procPath+pid+'/environ',function(err,buf){
         cb(err,nulldelim(buf));
       });
     },
     cwd:function(cb){
-      fs.readlink(module.exports.PROC+pid+"/cwd",function(err,path){
+      fs.readlink(procPath+pid+"/cwd",function(err,path){
         cb(err,path);
       })
     },
     io:function(cb){
-      fs.readFile(module.exports.PROC+pid+'/io',function(err,buf){
+      fs.readFile(procPath+pid+'/io',function(err,buf){
         if(err) return cb(err);
         cb(false,kv(buf));
       });
     },
     fds:function(cb){
-      var fddir = module.exports.PROC+pid+'/fd';
+      var fddir = procPath+pid+'/fd';
       fs.readdir(fddir,function(err,fds){
         if(err) return cb(err);
         fds = fds.map(function(v){
@@ -60,7 +65,7 @@ module.exports = function(pid,cb){ // or task: ":pid/task/:tid"
     },
     threads:function(cb){
       // read the number of threads running out of the tasks dir
-      var fddir = module.exports.PROC+pid+'/task';
+      var fddir = procPath+pid+'/task';
       fs.readdir(fddir,function(err,fds){
         if(err) return cb(err);
         //fds = fds.map(function(v){
@@ -84,6 +89,7 @@ module.exports.PROC = '/proc/';
 
 // stat fd, get full path, get type/socket type..
 module.exports.fd = function(fdlink,cb){
+
   fs.readlink(fdlink,function(err,p){
     if(err) return cb(err);
     var infop = fdlink.split('/');
@@ -121,7 +127,12 @@ module.exports.fd = function(fdlink,cb){
 }
 
 module.exports.cpu = function(cb){
-  fs.readFile(module.exports.PROC+'stat',function(err,buf){
+
+  var pp = _pp(arguments);
+  var procPath = pp.procPath
+  cb = pp.cb;
+
+  fs.readFile(procPath+'stat',function(err,buf){
     if(err) return cb(err);
     var lines = buf.toString().trim().split("\n");
 
@@ -144,7 +155,11 @@ module.exports.cpu = function(cb){
 
 // active tcp
 module.exports.tcp = function(cb){
-  fs.readFile(module.exports.PROC+"net/tcp",function(err,buf){
+  var pp = _pp(arguments);
+  var procPath = pp.procPath
+  cb = pp.cb;
+
+  fs.readFile(procPath+"net/tcp",function(err,buf){
     var t = nettable(buf);
     t.forEach(function(con){
       con.rem_address = fixaddr(con.rem_address);
@@ -156,7 +171,12 @@ module.exports.tcp = function(cb){
 
 // active udp
 module.exports.udp = function(cb){
-  fs.readFile(module.exports.PROC+"net/udp",function(err,buf){
+  var pp = _pp(arguments);
+  var procPath = pp.procPath
+  cb = pp.cb;
+
+
+  fs.readFile(procPath+"net/udp",function(err,buf){
     var t = nettable(buf);
     t.forEach(function(con){
       con.rem_address = fixaddr(con.rem_address);
@@ -168,7 +188,11 @@ module.exports.udp = function(cb){
 
 // active unix
 module.exports.unix = function(cb){
-  fs.readFile(module.exports.PROC+"net/unix",function(err,buf){
+  var pp = _pp(arguments);
+  var procPath = pp.procPath
+  cb = pp.cb;
+
+  fs.readFile(procPath+"net/unix",function(err,buf){
     var lines = buf.toString().trim().split("\n");
     var keys = lines.shift().trim().split(/\s+/);
     var out = [];
@@ -181,20 +205,33 @@ module.exports.unix = function(cb){
 
 // net dev stats per NIC
 module.exports.net = function(cb){
-  fs.readFile(module.exports.PROC+"net/dev",function(err,buf){
+  var pp = _pp(arguments);
+  var procPath = pp.procPath
+  cb = pp.cb;
+
+  fs.readFile(procPath+"net/dev",function(err,buf){
     cb(err,sectiontable(buf),buf);
   });
 }
 
 // wifi stats
 module.exports.wifi = function(cb){
-  fs.readFile(module.exports.PROC+"net/wireless",function(err,buf){
+  var pp = _pp(arguments);
+  var procPath = pp.procPath
+  cb = pp.cb;
+
+  fs.readFile(procPath+"net/wireless",function(err,buf){
     cb(err,sectiontable(buf),buf);
   });
 }
 
 module.exports.disk = function(cb){
-  fs.readFile(module.exports.PROC+"diskstats",function(err,buf){
+  var pp = _pp(arguments);
+  var procPath = pp.procPath
+  cb = pp.cb;
+
+
+  fs.readFile(procPath+"diskstats",function(err,buf){
     if(err) return cb(err);
 
     var lines = buf.toString().trim().split("\n");
@@ -256,7 +293,7 @@ module.exports.fields = {
 
 
 // works on linuxy /proc
-module.exports.works = fs.existsSync(module.exports.PROC+process.pid+'/stat');
+module.exports.works = fs.existsSync('/proc/'+process.pid+'/stat');
 
 function assoc(fields,values){
   var o = {};
@@ -366,4 +403,23 @@ function nulldelim(buf){
   var args = buf.toString().split("\x00")
   args.pop();// remove trailing empty.
   return args;
+}
+
+function _pp(a,num){
+  num = num||0;// number of static args. 
+  // custom proc path is always before the cb.
+  var args = [].slice.call(a);
+
+// pop off callback
+  var cb = args.pop();
+  
+  // shift off preceding args.
+  for(var i=0;i<num;++i) args.shift();
+
+  //i only ever need procpath.
+  var procPath = args.shift()||module.exports.PROC||'/proc/';
+  // add missing / if needed.
+  if(procPath.charAt(procPath.length-1) != '/') procPath += '/';
+
+  return {procPath:procPath,cb:cb};
 }
