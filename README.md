@@ -468,7 +468,7 @@ var thread = ps.thread(tid);
 <a name="disk"></a>
 ### procfs.disk(cb)
   - from /proc/diskstats
-  - calls back with an array of objects like this.
+  - call back format: cb(false, data, buf), where data looks like below
 
 ```js
 
