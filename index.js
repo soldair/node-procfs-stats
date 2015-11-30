@@ -297,7 +297,6 @@ module.exports.works = fs.existsSync('/proc/'+process.pid+'/stat');
 
 function assoc(fields,values){
   var o = {};
-  var a = 0;
   values.forEach(function(v,i){
     if(fields.length <= i) {
       if(!o._) o._ = {};
