@@ -140,12 +140,36 @@ module.exports.cpu = function(cb){
     lines.forEach(function(l){
       var p = l.indexOf(' ');
       var k = l.substr(0,p);
-      var v = l.substr(p).trim();
+      var v = l.substr(p + 1).trim();
 
       o[k] = v;
       if(k.indexOf('cpu') === 0) {
         o[k] = assoc(module.exports.fields['/proc/stat'].cpu,v.split(' '));
       }
+    })
+
+    cb(false,o);
+
+  });
+}
+
+module.exports.meminfo = function (cb){
+
+  var pp = _pp(arguments);
+  var procPath = pp.procPath
+  cb = pp.cb;
+
+  fs.readFile(procPath+'meminfo',function(err,buf){
+    if(err) return cb(err);
+    var lines = buf.toString().trim().split("\n");
+
+    var o = {};
+    lines.forEach(function(l){
+      var p = l.indexOf(':');
+      var k = l.substr(0,p);
+      var v = l.substr(p).replace(/kB/,'').trim();
+
+      o[k] = v;
     })
 
     cb(false,o);
@@ -405,13 +429,13 @@ function nulldelim(buf){
 }
 
 function _pp(a,num){
-  num = num||0;// number of static args. 
+  num = num||0;// number of static args.
   // custom proc path is always before the cb.
   var args = [].slice.call(a);
 
 // pop off callback
   var cb = args.pop();
-  
+
   // shift off preceding args.
   for(var i=0;i<num;++i) args.shift();
 

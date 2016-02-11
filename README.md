@@ -36,6 +36,7 @@ it would be so cool to have a higher level module that unifies system monitoring
  * <a href="#pidstats-threads">ps.threads(cb)</a>
  * <a href="#pidstats-thread">ps.thread(tid)</a>
  * <a href="#cpu">procfs.cpu(cb)</a>
+ * <a href="#meminfo">procfs.meminfo(cb)</a>
  * <a href="#fd">procfs.fd(cb)</a>
  * <a href="#tcp">procfs.tcp(cb)</a>
  * <a href="#udp">procfs.udp(cb)</a>
@@ -74,12 +75,12 @@ console.log(ps);
   cancelled_write_bytes: '0' }
 
 ```
- 
+
 <a name="pidstats-stat"></a>
 ### ps.stat(cb)
   - from /proc/pid/stat
   - mixed detailed process stats
-  - calls back with 
+  - calls back with
 
 ```js
 
@@ -203,7 +204,7 @@ console.log(ps);
   - calls back with the array of environment variables as they were defined when the process started.
 
 ```js
-  
+
 [ ...
   'MANPATH=:/usr/local/avr/man:/usr/local/avr/man',
   'LS_OPTIONS=--color=auto',
@@ -218,7 +219,7 @@ console.log(ps);
 <a name="pidstats-cwd"></a>
 ### ps.cwd(cb)
   - from /proc/pid/cwd
-  - calls back with the working directory of the process when it was started 
+  - calls back with the working directory of the process when it was started
 
 ```js
 
@@ -241,7 +242,7 @@ these are the args for the command ```node test/pid_argv.js --example```
 <a name="pidstats-fds"></a>
 ### ps.fds(cb)
   - from /proc/pid/fds
-  - returns an array of paths to file descriptors in the procfs fds directory for this process. 
+  - returns an array of paths to file descriptors in the procfs fds directory for this process.
 
 ```js
 
@@ -283,7 +284,7 @@ var thread = ps.thread(tid);
 
 ```js
 
-{ cpu: 
+{ cpu:
    { user: '22865094',
      nice: '8419',
      system: '41080741',
@@ -294,7 +295,7 @@ var thread = ps.thread(tid);
      steal: '0',
      guest: '0',
      guest_nice: '0' },
-  cpu0: 
+  cpu0:
    { user: '5417204',
      nice: '1535',
      system: '8517931',
@@ -316,13 +317,65 @@ var thread = ps.thread(tid);
 
 ```
 
+<a name="meminfo"></a>
+### procfs.meminfo(cb)
+  - from /proc/meminfo
+  - calls back with an object like this
+
+```js
+
+{ MemTotal: '1019452',
+  MemFree: '44328',
+  MemAvailable: '438588',
+  Buffers: '110444',
+  Cached: '233468',
+  SwapCached: '0',
+  Active: '745748',
+  Inactive: '136524',
+  'Active(anon)': '538432',
+  'Inactive(anon)': '64',
+  'Active(file)': '207316',
+  'Inactive(file)': '136460',
+  Unevictable: '0',
+  Mlocked: '0',
+  SwapTotal: '0',
+  SwapFree: '0',
+  Dirty: '25788',
+  Writeback: '0',
+  AnonPages: '538432',
+  Mapped: '76296',
+  Shmem: '136',
+  Slab: '75952',
+  SReclaimable: '65052',
+  SUnreclaim: '10900',
+  KernelStack: '2880',
+  PageTables: '5264',
+  NFS_Unstable: '0',
+  Bounce: '0',
+  WritebackTmp: '0',
+  CommitLimit: '509724',
+  Committed_AS: '1070328',
+  VmallocTotal: '34359738367',
+  VmallocUsed: '2528',
+  VmallocChunk: '34359729003',
+  AnonHugePages: '0',
+  HugePages_Total: '0',
+  HugePages_Free: '0',
+  HugePages_Rsvd: '0',
+  HugePages_Surp: '0',
+  Hugepagesize: '2048',
+  DirectMap4k: '22528',
+  DirectMap2M: '1026048' }
+
+```
+
 <a name="fd"></a>
 ### procfs.fd(fdPath,cb)
   - from /proc/pid/fds/fd and /proc/pid/fdinfo
-  - fdPath is the full path 
-  - calls back with an object 
+  - fdPath is the full path
+  - calls back with an object
   - stat is an fs.Stats object
-  - full path to file. 
+  - full path to file.
   - in the case of a socket a string "socket[inode]" or some such will be returned. you can lookup the inode in the net.tcp||udp||unix table for even more info!
 
 ```js
@@ -330,7 +383,7 @@ var thread = ps.thread(tid);
 { fd: '/proc/8306/fd/2',
   path: '/dev/pts/6',
   info: { pos: '0', flags: '02100002' },
-  stat: 
+  stat:
    { dev: 11,
      mode: 8576,
      nlink: 1,
@@ -378,7 +431,7 @@ var thread = ps.thread(tid);
     uid: '118',
     timeout: '0',
     inode: '12881',
-    _: 
+    _:
      { '12': '1',
        '13': '0000000000000000',
        '14': '100',
@@ -420,7 +473,7 @@ var thread = ps.thread(tid);
 ### procfs.unix(cb)
   - from /proc/net/unix
   - the unix socket table as an array
-  
+
 ```js
 [ { Num: '0000000000000000:',
     RefCount: '00000002',
