@@ -140,7 +140,7 @@ module.exports.cpu = function(cb){
     lines.forEach(function(l){
       var p = l.indexOf(' ');
       var k = l.substr(0,p);
-      var v = l.substr(p + 1).trim();
+      var v = l.substr(p).trim();
 
       o[k] = v;
       if(k.indexOf('cpu') === 0) {
@@ -167,7 +167,7 @@ module.exports.meminfo = function (cb){
     lines.forEach(function(l){
       var p = l.indexOf(':');
       var k = l.substr(0,p);
-      var v = l.substr(p).replace(/kB/,'').trim();
+      var v = l.substr(p + 1).replace(/kB/,'').trim();
 
       o[k] = v;
     })
