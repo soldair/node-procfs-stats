@@ -12,7 +12,8 @@
     "tape": "~2.3.2"
   },
   "dependencies": {
-    "hexip": "~1.0.1"
+    "hexip": "~1.0.1",
+    "lru-cache": "^4.0.0"
   },
   "repository": {
     "url": "git://github.com/soldair/node-procfs-stats.git"

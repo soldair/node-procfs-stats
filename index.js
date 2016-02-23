@@ -1,6 +1,8 @@
 
 var fs = require('fs');
 var hexip = require('hexip');
+var parseaddr = require('./lib/parse-addr')
+var nettable = require('./lib/nettable')
 
 // read the procfs stat file for a pid
 module.exports = function(pid/*,procpath*/,cb){ // or task: ":pid/task/:tid"
@@ -183,11 +185,11 @@ module.exports.tcp = function(cb){
   var procPath = pp.procPath
   cb = pp.cb;
 
-  fs.readFile(procPath+"net/tcp",function(err,buf){
+  fs.readFile(__dirname+'/test/tcp-example'||procPath+"net/tcp",function(err,buf){
     var t = nettable(buf);
     t.forEach(function(con){
-      con.rem_address = fixaddr(con.rem_address);
-      con.local_address = fixaddr(con.local_address);
+      con.rem_address = parseaddr(con.rem_address);
+      con.local_address = parseaddr(con.local_address);
     });
     cb(err,t,buf);
   });
@@ -203,8 +205,8 @@ module.exports.udp = function(cb){
   fs.readFile(procPath+"net/udp",function(err,buf){
     var t = nettable(buf);
     t.forEach(function(con){
-      con.rem_address = fixaddr(con.rem_address);
-      con.local_address = fixaddr(con.local_address);
+      con.rem_address = parseaddr(con.rem_address);
+      con.local_address = parseaddr(con.local_address);
     });
     cb(err,t,buf);
   });
@@ -343,7 +345,10 @@ function kv(buf){
 }
 
 
-function nettable(data){
+module.exports._nettable = _nettable
+
+
+function _nettable(data){
   if(!data) return false;
   var lines = data.toString().trim().split("\n");
   var split = /\s+/g;
@@ -414,11 +419,6 @@ function sectiontable(buf){
   });
 
   return data;
-}
-
-function fixaddr(addr){
-  addr = addr.split(':');
-  return hexip(addr[0])+':'+hexip.port(addr[1]);
 }
 
 function nulldelim(buf){
