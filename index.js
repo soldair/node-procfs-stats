@@ -185,7 +185,7 @@ module.exports.tcp = function(cb){
   var procPath = pp.procPath
   cb = pp.cb;
 
-  fs.readFile(__dirname+'/test/tcp-example'||procPath+"net/tcp",function(err,buf){
+  fs.readFile(procPath+"net/tcp",function(err,buf){
     var t = nettable(buf);
     t.forEach(function(con){
       con.rem_address = parseaddr(con.rem_address);
