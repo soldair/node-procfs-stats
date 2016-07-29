@@ -1,4 +1,4 @@
-
+var once  = require('once')
 var fs = require('fs');
 var hexip = require('hexip');
 var parseaddr = require('./lib/parse-addr')
@@ -79,6 +79,56 @@ module.exports = function(pid/*,procpath*/,cb){ // or task: ":pid/task/:tid"
     thread:function(tid){
       return  module.exports(pid+"/task/"+tid);
     },
+    net:function(cb){
+      cb = once(cb)
+      var c = 2
+      
+      var tcp;
+      var fds;
+      
+
+      module.exports.tcp(procPath,function(err,data){
+        if(err) return cb(err)
+
+        tcp = data
+        next()
+      })
+
+      this.fds(function(err,data){
+
+        if(err) return cb(err)
+
+        var fds = {}
+        var todo = data.length;
+        if(!todo) return next()
+
+        function work(){
+          if(!data.length) return;
+          var fd = data.shift()
+          fs.readlink(fd,function(err,path){
+            // the fd may not exist anymore.
+            if(err) return next();
+
+            fds[fd] = path;
+            if(!--todo) next() 
+          })
+        }
+
+        var conc = 10
+        while(conc-- > 0) work() 
+
+      })
+
+      function next(){
+        if(--c) return work()
+
+        // find socket fds in tcp nettable
+
+        console.log(nettable)
+        console.log(fds)
+
+      }
+    }
   }
 
   return o;
@@ -344,29 +394,6 @@ function kv(buf){
   return info;
 }
 
-
-module.exports._nettable = _nettable
-
-
-function _nettable(data){
-  if(!data) return false;
-  var lines = data.toString().trim().split("\n");
-  var split = /\s+/g;
-  var keys = lines.shift().trim().split(split);
-
-  lines = lines.map(function(l){
-    var values = l.trim().split(split);
-    values.forEach(function(v,i){
-      if(keys[i] == 'tx_queue' || keys[i] == "tr") {
-        var parts = v.split(":");
-        values[i] = parts[0];
-        values.splice(i+1,0,parts[1]);
-      }
-    });
-    return assoc(keys,values);
-  })
-  return lines;
-}
 
 function sectiontable(buf){
   if(!buf) return false;
