@@ -236,12 +236,13 @@ module.exports.tcp = function(cb){
   cb = pp.cb;
 
   fs.readFile(procPath+"net/tcp",function(err,buf){
+    if(err) return cb(err);
     var t = nettable(buf);
     t.forEach(function(con){
       con.rem_address = parseaddr(con.rem_address);
       con.local_address = parseaddr(con.local_address);
     });
-    cb(err,t,buf);
+    cb(null,t,buf);
   });
 }
 
@@ -253,12 +254,13 @@ module.exports.udp = function(cb){
 
 
   fs.readFile(procPath+"net/udp",function(err,buf){
+    if(err) return cb(err);
     var t = nettable(buf);
     t.forEach(function(con){
       con.rem_address = parseaddr(con.rem_address);
       con.local_address = parseaddr(con.local_address);
     });
-    cb(err,t,buf);
+    cb(null,t,buf);
   });
 }
 
@@ -269,13 +271,14 @@ module.exports.unix = function(cb){
   cb = pp.cb;
 
   fs.readFile(procPath+"net/unix",function(err,buf){
+    if(err) return cb(err);
     var lines = buf.toString().trim().split("\n");
     var keys = lines.shift().trim().split(/\s+/);
     var out = [];
     lines.forEach(function(l){
       out.push(assoc(keys,l.trim().split(/\s+/)))
     });
-    cb(err,out,buf);
+    cb(null,out,buf);
   });
 }
 
@@ -286,6 +289,7 @@ module.exports.net = function(cb){
   cb = pp.cb;
 
   fs.readFile(procPath+"net/dev",function(err,buf){
+    if(err) return cb(err);
     cb(err,sectiontable(buf),buf);
   });
 }
@@ -297,7 +301,8 @@ module.exports.wifi = function(cb){
   cb = pp.cb;
 
   fs.readFile(procPath+"net/wireless",function(err,buf){
-    cb(err,sectiontable(buf),buf);
+    if(err) return cb(err);
+    cb(null,sectiontable(buf),buf);
   });
 }
 
